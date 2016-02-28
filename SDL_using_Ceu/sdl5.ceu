@@ -1,0 +1,94 @@
+#include "sdl.ceu"
+
+input void SDL_REDRAW;
+input void SDL_QUIT;
+
+var _SDL_Window&? win;
+    finalize
+        win = &_SDL_CreateWindow("SDL 5", _SDL_WINDOWPOS_CENTERED,
+                                         _SDL_WINDOWPOS_CENTERED,
+                                         800, 480,
+                                         _SDL_WINDOW_SHOWN);
+    with
+        _SDL_DestroyWindow(&&win!);
+    end
+
+var int w=0, h=0;
+_SDL_GetWindowSize(&&win!, &&w, &&h);
+
+var _SDL_Renderer&? ren;
+    finalize
+        ren = &_SDL_CreateRenderer(&&win!, -1, 0);
+    with
+        _SDL_DestroyRenderer(&&ren!);
+    end
+
+var SDL_Rect  bg     = SDL_Rect(0,0 , w,h);
+var SDL_Color bg_clr = SDL_Color(0x00, 0x00, 0x00, 0xFF);
+
+var _SDL_Texture&? tex;
+    finalize
+        tex = &_IMG_LoadTexture(&&ren!, "img.png");
+    with
+        _SDL_DestroyTexture(&&tex!);
+    end
+var SDL_Rect tex_r = SDL_Rect(100,100, 20,20);
+
+_TTF_Init();
+    finalize with
+        _TTF_Quit();
+    end
+
+var _TTF_Font&? fnt;
+    finalize
+        fnt = &_TTF_OpenFont("Deutsch.ttf", 40);
+    with
+        _TTF_CloseFont(&&fnt!);
+    end
+
+var _SDL_Texture&? str_tex;
+var SDL_Rect str_r = SDL_Rect(10,10, 200,20);
+//do
+    var SDL_Color clr = SDL_Color(0xFF, 0xFF, 0xFF, 0xFF);
+    var _SDL_Surface&? sfc;
+    finalize
+        sfc = &_TTF_RenderText_Blended(&&fnt!, "Hello world!", 
+                                                        *(_SDL_Color&&)&&clr);
+    with
+        _SDL_FreeSurface(&&sfc!);
+    end
+    finalize
+        str_tex = &_SDL_CreateTextureFromSurface(&&ren!, &&sfc!);
+    with
+        _SDL_DestroyTexture(&&str_tex!);
+    end
+//end
+
+_Mix_OpenAudio(22050, _AUDIO_S16SYS, 2, 4096);
+    finalize with
+        _Mix_CloseAudio();
+    end
+var _Mix_Chunk&? snd;
+    finalize
+        snd = &_Mix_LoadWAV("click1.wav");
+    with
+        _Mix_FreeChunk(&&snd!);
+    end
+
+par/or do
+    await SDL_QUIT;
+with
+    every 5s do
+        _Mix_PlayChannel(-1, &&snd!, 0);
+    end
+with
+    every SDL_REDRAW do
+        _SDL_SetRenderDrawColor(&&ren!, 0x00,0x00,0x00,0xFF);
+        _SDL_RenderFillRect(&&ren!, (_SDL_Rect&&)&&bg);
+        _SDL_RenderCopy(&&ren!, &&tex!, null, (_SDL_Rect&&)&&tex_r);
+        _SDL_RenderCopy(&&ren!, &&str_tex!, null, (_SDL_Rect&&)&&str_r);
+        _SDL_RenderPresent(&&ren!);
+    end
+end
+
+escape 0;
