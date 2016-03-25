@@ -1,0 +1,4 @@
+/home/vic/git/SDL-Examples/SDL_using_Ceu/sdl5.ceu:1:19: fatal error: sdl.ceu: No such file or directory
+ #include "sdl.ceu"
+                   ^
+compilation terminated.

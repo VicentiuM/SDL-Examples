@@ -1,0 +1,2 @@
+This is an example of a project that was written in SDL2 and ported to Emscripten
+Use the wasd keys to move the square.
