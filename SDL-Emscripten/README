@@ -1,2 +1,5 @@
 This is an example of a project that was written in SDL2 and ported to Emscripten
 Use the wasd keys to move the square.
+
+I have also added the c file. If you want to compile it using emscripten you should enter the following command line
+emcc /where/file/is.c -s USE_SDL=2 -o /where/you/want/file/to/be.html
